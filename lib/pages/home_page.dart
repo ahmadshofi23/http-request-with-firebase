@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:http_request_with_firebase/pages/addplayer_page.dart';
 import 'package:http_request_with_firebase/pages/detail_page.dart';
@@ -80,11 +81,31 @@ class _HomePageState extends State<HomePage> {
                       arguments: id,
                     );
                   },
-                  leading: CircleAvatar(
-                    backgroundImage: NetworkImage(
-                      allPlayerProvider.allPlayer[index].imageUrl,
+                  // leading: CircleAvatar(
+                  //   backgroundImage: NetworkImage(
+                  //     allPlayerProvider.allPlayer[index].imageUrl,
+                  //   ),
+                  // ),
+                  //
+                  leading: ClipRRect(
+                    borderRadius: BorderRadius.circular(50),
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      child: CachedNetworkImage(
+                        imageUrl: allPlayerProvider.allPlayer[index].imageUrl,
+                        placeholder: (context, url) =>
+                            CircularProgressIndicator(),
+                        errorWidget: (context, url, error) => Container(
+                          width: 50,
+                          height: 50,
+                          child: Image.network(
+                              "https://www.uclg-planning.org/sites/default/files/styles/featured_home_left/public/no-user-image-square.jpg"),
+                        ),
+                      ),
                     ),
                   ),
+
                   title: Text(
                     allPlayerProvider.allPlayer[index].name,
                   ),

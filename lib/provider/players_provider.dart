@@ -16,25 +16,25 @@ class PlayersProvider with ChangeNotifier {
   PlayerModels selectById(String id) =>
       _allPlayer.firstWhere((element) => element.id == id);
 
-  Future<void> addPlayer(String name, String position, String image) {
+  addPlayer(String name, String position, String image) async {
     DateTime datetimeNow = DateTime.now();
 
     Uri url = Uri.parse(
         "https://temafutsal-1886f-default-rtdb.firebaseio.com/players.json");
-    return http
-        .post(
-      url,
-      body: json.encode(
-        {
-          "name": name,
-          "position": position,
-          "imageUrl": image,
-          "cretateAt": datetimeNow.toString(),
-        },
-      ),
-    )
-        .then(
-      (response) {
+
+    try {
+      final response = await http.post(
+        url,
+        body: json.encode(
+          {
+            "name": name,
+            "position": position,
+            "imageUrl": image,
+            "cretateAt": datetimeNow.toString(),
+          },
+        ),
+      );
+      if (response.statusCode >= 200 && response.statusCode < 300) {
         _allPlayer.add(
           PlayerModels(
             id: json.decode(response.body)["name"].toString(),
@@ -46,47 +46,65 @@ class PlayersProvider with ChangeNotifier {
         );
 
         notifyListeners();
-      },
-    );
+      } else {
+        throw ("${response.statusCode}");
+      }
+    } catch (error) {
+      throw (error);
+    }
   }
 
-  Future<void> editPlayer(
-      String id, String name, String position, String image) {
+  editPlayer(String id, String name, String position, String image) async {
     Uri url = Uri.parse(
         "https://temafutsal-1886f-default-rtdb.firebaseio.com/players/$id.json");
-    return http
-        .patch(
-      url,
-      body: json.encode(
-        {
-          "name": name,
-          "position": position,
-          "imageUrl": image,
-          // "cretateAt": datetimeNow.toString(),
-        },
-      ),
-    )
-        .then(
-      (response) {
+
+    try {
+      final response = await http.patch(
+        url,
+        body: json.encode(
+          {
+            "name": name,
+            "position": position,
+            "imageUrl": image,
+            // "cretateAt": datetimeNow.toString(),
+          },
+        ),
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
         PlayerModels selectPlayer =
             _allPlayer.firstWhere((element) => element.id == id);
         selectPlayer.name = name;
         selectPlayer.position = position;
         selectPlayer.imageUrl = image;
+
         notifyListeners();
-      },
-    );
+      } else {
+        throw ("${response.statusCode}");
+      }
+    } catch (error) {
+      throw (error);
+    }
   }
 
-  Future deletePlayer(String id) {
+  deletePlayer(String id) async {
     Uri url = Uri.parse(
         "https://temafutsal-1886f-default-rtdb.firebaseio.com/players/$id.json");
-    return http.delete(url).then(
-      (response) {
-        _allPlayer.removeWhere((element) => element.id == id);
-        notifyListeners();
-      },
-    );
+
+    try {
+      final response = await http.delete(url).then(
+        (response) {
+          _allPlayer.removeWhere((element) => element.id == id);
+          notifyListeners();
+        },
+      );
+
+      if (response.statusCode < 200 && response.statusCode >= 300) {
+        throw ("${response.statusCode}");
+      }
+    } catch (error) {
+      throw (error);
+    }
   }
 
   Future<void> initialData() async {
@@ -94,23 +112,27 @@ class PlayersProvider with ChangeNotifier {
         "https://temafutsal-1886f-default-rtdb.firebaseio.com/players.json");
     var hasilGetData = await http.get(url);
     var dataResponse = json.decode(hasilGetData.body) as Map<String, dynamic>;
-    dataResponse.forEach(
-      (key, value) {
-        // print(value);
-        DateTime dateTimerParse =
-            DateFormat("yyyy-mm-dd hh:mm:ss").parse(value["cretateAt"]);
-        print(dateTimerParse);
-        _allPlayer.add(
-          PlayerModels(
-            id: key,
-            name: value["name"],
-            cretateAt: dateTimerParse,
-            position: value["position"],
-            imageUrl: value["imageUrl"],
-          ),
-        );
-      },
-    );
-    notifyListeners();
+
+    // ignore: unnecessary_null_comparison
+    if (dataResponse != null) {
+      dataResponse.forEach(
+        (key, value) {
+          // print(value);
+          DateTime dateTimerParse =
+              DateFormat("yyyy-mm-dd hh:mm:ss").parse(value["cretateAt"]);
+          print(dateTimerParse);
+          _allPlayer.add(
+            PlayerModels(
+              id: key,
+              name: value["name"],
+              cretateAt: dateTimerParse,
+              position: value["position"],
+              imageUrl: value["imageUrl"],
+            ),
+          );
+        },
+      );
+      notifyListeners();
+    }
   }
 }

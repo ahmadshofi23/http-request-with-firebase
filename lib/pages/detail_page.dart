@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:http_request_with_firebase/models/player_models.dart';
 import 'package:http_request_with_firebase/provider/players_provider.dart';
@@ -27,19 +28,38 @@ class DetailPlayerPage extends StatelessWidget {
           child: Column(
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(100),
+                borderRadius: BorderRadius.circular(150),
                 child: Container(
                   width: 150,
                   height: 150,
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: NetworkImage(imageController.text),
+                  child: CachedNetworkImage(
+                    fit: BoxFit.cover,
+                    imageUrl: imageController.text,
+                    placeholder: (context, url) => CircularProgressIndicator(),
+                    errorWidget: (context, url, error) => Container(
+                      width: 50,
+                      height: 50,
+                      child: Image.network(
+                          "https://www.uclg-planning.org/sites/default/files/styles/featured_home_left/public/no-user-image-square.jpg"),
                     ),
                   ),
                 ),
               ),
+
+              // ClipRRect(
+              //   borderRadius: BorderRadius.circular(100),
+              //   child: Container(
+              //     width: 150,
+              //     height: 150,
+              //     decoration: BoxDecoration(
+              //       color: Colors.blue,
+              //       image: DecorationImage(
+              //         fit: BoxFit.cover,
+              //         image: NetworkImage(imageController.text),
+              //       ),
+              //     ),
+              //   ),
+              // ),
               TextFormField(
                 autocorrect: false,
                 autofocus: true,
